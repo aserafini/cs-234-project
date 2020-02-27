@@ -77,7 +77,7 @@ def get_returns(self, paths):
         if t == T-1:
           returns.append(rewards[t])
         else:
-          returns.append(self.config.gamma * returns[-1] + rewards[t])
+          returns.append(self.gamma * returns[-1] + rewards[t])
 
       returns.reverse()
 
