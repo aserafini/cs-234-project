@@ -58,13 +58,33 @@ def sample_trajectories(self):
 
         episode_rewards.append(ep_reward)
 
-        path = {'observation' : np.array(states),
-                'reward' : np.array(rewards),
-                'action' : np.array(actions)}
+        path = {"observation" : np.array(states),
+                "reward" : np.array(rewards),
+                "action" : np.array(actions)}
         paths.append(path)
 
     return paths, episode_rewards            
 
+
+def get_returns(self, paths):
+    all_returns = []
+    for path in paths:
+      rewards = path["reward"]
+
+      returns = []
+      T = len(rewards)
+      for t in range(T-1, -1, -1):
+        if t == T-1:
+          returns.append(rewards[t])
+        else:
+          returns.append(self.config.gamma * returns[-1] + rewards[t])
+
+      returns.reverse()
+
+      all_returns.append(returns)
+    returns = np.concatenate(all_returns)
+
+    return returns
 
 def train(self):
     """
