@@ -95,11 +95,14 @@ def train(self):
       returns = self.get_returns(paths)
 
       # advantage will depend on the baseline implementation
-      advantages = self.calculate_advantage(returns, observations)
+      # advantages = self.calculate_advantage(returns, observations)
+      # IF NO BASELINE:
+      advantages = returns
 
       # run training operations
-      if self.config.use_baseline:
-        self.baseline_network.update_baseline(returns, observations)
+      # if self.config.use_baseline:
+      #   self.baseline_network.update_baseline(returns, observations)
+      
       self.sess.run(self.train_op, feed_dict={
                     self.observation_placeholder : observations,
                     self.action_placeholder : actions,
