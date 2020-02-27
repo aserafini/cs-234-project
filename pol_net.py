@@ -47,9 +47,23 @@ def sample_trajectories(self):
             train_a = self.net.train_accuracy()
             test_a = self.net.test_accuracy()
 
+            if self.window > 1:
+                state = state[2:] + [train_a, test_a]
+            else:
+                state = [train_a, test_a]
+
             actions.append(log_lr)
             rewards.append(test_a)
+            ep_reward += test_a
 
+        episode_rewards.append(ep_reward)
+
+        path = {'observation' : np.array(states),
+                'reward' : np.array(rewards),
+                'action' : np.array(actions)}
+        paths.append(path)
+
+    return paths, episode_rewards            
 
 
 def train(self):
