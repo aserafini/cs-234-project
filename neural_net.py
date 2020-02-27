@@ -65,21 +65,34 @@ class MNIST_Net(nn.Module):
 
 		return train_loss / 15000
 
-	def test_loss(self):
+	def predict(self, images):
+		with torch.no_grad():
+			outputs = self.forward(images)
+			_, predicted = torch.max(outputs.data, 1)
+
+		return predicted
+
+	def test_accuracy(self):
 		correct = 0
 		total = 0
-		with torch.no_grad():
-			for data in self.testloader:
-				images, labels = data
-				outputs = self.forward(images)
-				_, predicted = torch.max(outputs.data, 1)
-				total += labels.size(0)
-				correct += (predicted == labels).sum().item()
+		for data in self.testloader:
+			images, labels = data
+			predicted = self.predict(images)
+			total += labels.size(0)
+			correct += (predicted == labels).sum().item()
+		return correct / total
 
-		return correct / total		
+	def train_accuracy(self):
+		correct = 0
+		total = 0
+		for data in self.trainloader:
+			images, labels = data
+			predicted = self.predict(images)
+			total += labels.size(0)
+			correct += (predicted == labels).sum().item()
+		return correct / total	
 
-		# print('Accuracy of the network on the 10000 test images: %d %%' % (
-		#     100 * correct / total))			
+	# def unlearn(self):
 
 
 	def forward(self, x):
