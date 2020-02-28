@@ -92,7 +92,8 @@ class MNIST_Net(nn.Module):
 			correct += (predicted == labels).sum().item()
 		return correct / total	
 
-	# def unlearn(self):
+	def unlearn(self):
+		self.reset_parameters()
 
 
 	def forward(self, x):

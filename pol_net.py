@@ -1,5 +1,20 @@
 import torch.nn as nn
 import numpy as np
+import logging
+
+def get_logger(filename):
+  """
+  Return a logger instance to a file
+  """
+  logger = logging.getLogger('logger')
+  logger.setLevel(logging.DEBUG)
+  logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+  handler = logging.FileHandler(filename)
+  handler.setLevel(logging.DEBUG)
+  handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s: %(message)s'))
+  logging.getLogger().addHandler(handler)
+  return logger
+
 
 class PG(nn.Module):
   """
@@ -8,9 +23,10 @@ class PG(nn.Module):
   def __init__(self, net, logger=None):
     super(PG, self).__init__()
 
-    self.logger = logger
     if logger is None:
-      self.logger = get_logger('./')
+      self.logger = get_logger('.log.txt')
+    else:
+      self.logger = logger
 
     self.net = net
     self.gamma = 0.9
@@ -20,8 +36,6 @@ class PG(nn.Module):
     self.log_std = nn.Parameter(torch.empty(1).fill_(-10.0))
 
     self.saved_log_probs = []
-
-    # self.observation_dim = self.env.observation_space.shape[0]
 
 def forward(self, x):
     x = self.linear(x)
@@ -37,10 +51,6 @@ def select_action(self, state):
 
     return action.item()
 
-    # m = Categorical(probs)
-    # action = m.sample()
-    # policy.saved_log_probs.append(m.log_prob(action))
-    # return action.item()
 
 def sample_trajectories(self):
     self.batch_size = 1
@@ -139,30 +149,10 @@ def train(self):
       observations = np.concatenate([path["observation"] for path in paths])
       actions = np.concatenate([path["action"] for path in paths])
       rewards = np.concatenate([path["reward"] for path in paths])
-      # compute Q-val estimates (discounted future returns) for each time step
-      returns = self.get_returns(paths)
 
-      # advantage will depend on the baseline implementation
-      # advantages = self.calculate_advantage(returns, observations)
-      # IF NO BASELINE:
-      
-      ## TODO: SUM OVER BATCH SIZES?
+      returns = self.get_returns(paths)
       
       self.update_pol(returns)
-
-      # run training operations
-      # if self.config.use_baseline:
-      #   self.baseline_network.update_baseline(returns, observations)
-      
-      # self.sess.run(self.train_op, feed_dict={
-      #               self.observation_placeholder : observations,
-      #               self.action_placeholder : actions,
-      #               self.advantage_placeholder : advantages})
-
-      # tf stuff
-      # if (t % self.config.summary_freq == 0):
-      #   self.update_averages(total_rewards, scores_eval)
-      #   self.record_summary(t)
 
       # compute reward statistics for this batch and log
       avg_reward = np.mean(total_rewards)
@@ -170,11 +160,11 @@ def train(self):
       msg = "Average reward: {:04.2f} +/- {:04.2f}".format(avg_reward, sigma_reward)
       self.logger.info(msg)
 
-      if  self.config.record and (last_record > self.config.record_freq):
-        self.logger.info("Recording...")
-        last_record =0
-        self.record()
+      # if  self.config.record and (last_record > self.config.record_freq):
+      #   self.logger.info("Recording...")
+      #   last_record =0
+      #   self.record()
 
     self.logger.info("- Training done.")
-    export_plot(scores_eval, "Score", self.config.env_name, self.config.plot_output)
+    #export_plot(scores_eval, "Score", self.config.env_name, self.config.plot_output)
 
