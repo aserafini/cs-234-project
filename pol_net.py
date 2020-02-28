@@ -17,12 +17,30 @@ class PG(nn.Module):
 
     self.window = 3
     self.linear = nn.Linear(2 * self.window, 1)
+    self.log_std = nn.Parameter(torch.empty(1).fill_(-10.0))
+
+    self.saved_log_probs = []
 
     # self.observation_dim = self.env.observation_space.shape[0]
 
 def forward(self, x):
     x = self.linear(x)
     return x
+
+def select_action(self, state):
+    mean = self.forward(state)
+
+    dist = torch.distributions.normal.Normal(mean, torch.exp(self.log_std))
+    action = dist.rsample()
+
+    self.saved_log_probs.append(dist.log_prob(action))
+
+    return action.item()
+
+    # m = Categorical(probs)
+    # action = m.sample()
+    # policy.saved_log_probs.append(m.log_prob(action))
+    # return action.item()
 
 def sample_trajectories(self):
     self.batch_size = 1
@@ -41,8 +59,9 @@ def sample_trajectories(self):
 
         for epoch in range(self.n_epochs):
             states.append(state)
-            log_lr = self.forward(states[-1]).item()
-            self.net.train_epoch(epoch, np.exp(lr))
+            log_lr = self.select_action(state)
+
+            self.net.train_epoch(epoch, torch.exp(log_lr))
 
             train_a = self.net.train_accuracy()
             test_a = self.net.test_accuracy()
@@ -86,6 +105,15 @@ def get_returns(self, paths):
 
     return returns
 
+def update_pol(self):
+  normed_returns = (returns-np.mean(returns))/(np.std(returns)+1e-10)
+  policy_loss = -1 * (self.saved_log_probs * normed_returns).sum()
+
+  optimizer.zero_grad()
+  policy_loss.backward()
+  optimizer.step()
+  self.saved_log_probs = []
+
 def train(self):
     """
     Performs training
@@ -105,7 +133,7 @@ def train(self):
     for t in range(self.num_batches):
 
       # collect a minibatch of samples
-      paths, total_rewards = self.sample_trajectories() ###WE'RE HERE
+      paths, total_rewards = self.sample_trajectories() 
 
       scores_eval = scores_eval + total_rewards
       observations = np.concatenate([path["observation"] for path in paths])
@@ -117,21 +145,24 @@ def train(self):
       # advantage will depend on the baseline implementation
       # advantages = self.calculate_advantage(returns, observations)
       # IF NO BASELINE:
-      advantages = returns
+      
+      ## TODO: SUM OVER BATCH SIZES?
+      
+      self.update_pol(returns)
 
       # run training operations
       # if self.config.use_baseline:
       #   self.baseline_network.update_baseline(returns, observations)
       
-      self.sess.run(self.train_op, feed_dict={
-                    self.observation_placeholder : observations,
-                    self.action_placeholder : actions,
-                    self.advantage_placeholder : advantages})
+      # self.sess.run(self.train_op, feed_dict={
+      #               self.observation_placeholder : observations,
+      #               self.action_placeholder : actions,
+      #               self.advantage_placeholder : advantages})
 
       # tf stuff
-      if (t % self.config.summary_freq == 0):
-        self.update_averages(total_rewards, scores_eval)
-        self.record_summary(t)
+      # if (t % self.config.summary_freq == 0):
+      #   self.update_averages(total_rewards, scores_eval)
+      #   self.record_summary(t)
 
       # compute reward statistics for this batch and log
       avg_reward = np.mean(total_rewards)
