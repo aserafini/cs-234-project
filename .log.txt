@@ -1,0 +1,15 @@
+2020-02-27 21:14:53,933:INFO: Average reward: 0.10 +/- 0.00
+2020-02-27 21:15:41,877:INFO: Average reward: 0.25 +/- 0.00
+2020-02-27 21:20:26,473:INFO: Average reward: 0.37 +/- 0.00
+2020-02-27 21:23:24,293:INFO: Average reward: 1.84 +/- 0.00
+2020-02-27 21:32:24,450:INFO: Average reward: 1.31 +/- 0.00
+2020-02-27 21:34:16,053:INFO: Average reward: 0.23 +/- 0.00
+2020-02-27 21:48:31,177:INFO: Average reward: 9.40 +/- 0.00
+2020-02-27 22:00:45,487:INFO: Average reward: 7.17 +/- 0.00
+2020-02-27 22:12:42,237:INFO: Average reward: 6.63 +/- 0.00
+2020-02-27 22:27:24,640:INFO: Average reward: 14.29 +/- 0.00
+2020-02-27 22:39:00,873:INFO: Average reward: 14.34 +/- 0.00
+2020-02-27 22:50:22,480:INFO: Average reward: 14.31 +/- 0.00
+2020-02-27 23:01:44,539:INFO: Average reward: 14.31 +/- 0.00
+2020-02-27 23:13:04,073:INFO: Average reward: 14.33 +/- 0.00
+2020-02-27 23:13:04,074:INFO: - Training done.

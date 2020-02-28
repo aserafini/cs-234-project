@@ -20,12 +20,12 @@ class MNIST_Net(nn.Module):
 		trainset = torchvision.datasets.MNIST(root='./data', train=True,
 			download=True, transform=transform)
 		self.trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
-			shuffle=True, num_workers=2)
+			shuffle=True, num_workers=0)
 
 		testset = torchvision.datasets.MNIST(root='./data', train=False,
 			download=True, transform=transform)
 		self.testloader = torch.utils.data.DataLoader(testset, batch_size=4,
-			shuffle=False, num_workers=2)
+			shuffle=False, num_workers=0)
 
 		self.classes = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 
@@ -34,9 +34,10 @@ class MNIST_Net(nn.Module):
 		self.fc3 = nn.Linear(84, 10)
 
 		self.criterion = nn.CrossEntropyLoss() #softmax lives in here
-		self.optimizer = optim.SGD(self.parameters(), lr=69696969, momentum=0) 
+		self.optimizer = optim.SGD(self.parameters(), lr=6969696969, momentum=0) 
 
 	def train_epoch(self, epoch, lr):
+		print('potentially less fucking stupid learning rate', lr)
 		for param_group in self.optimizer.param_groups:
 			param_group['lr'] = lr
 
@@ -90,10 +91,16 @@ class MNIST_Net(nn.Module):
 			predicted = self.predict(images)
 			total += labels.size(0)
 			correct += (predicted == labels).sum().item()
-		return correct / total	
+		return correct / total
+
 
 	def unlearn(self):
-		self.reset_parameters()
+		
+		def weight_reset(m):
+			if isinstance(m, nn.Linear):
+				m.reset_parameters()
+		
+		self.apply(weight_reset)
 
 
 	def forward(self, x):
