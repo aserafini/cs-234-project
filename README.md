@@ -2,8 +2,10 @@
 
 JC, Anav, and Arianna train an RL agent to learn to change the learning rate to help another network learn to tell the difference between numbers
 
-It didn't work
+It didn't work.
 
-Now the gang is back and they're here to train an RL agent to learn to change ALL the parameters of another network to help that network learn to tell the difference between numbers.
+The gang is back and this time, it's personal. They're here to train another RL agent and oh man wait 'till you here about this one. 
 
-Will it work? Let's find out
+*slaps policy gradient* This bad boy can update so many gosh darn parameters of this *slaps roof of vanilla neural network* bad boy which knows a pretty good amount about the numbers 1-10.
+
+Stay tuned.
