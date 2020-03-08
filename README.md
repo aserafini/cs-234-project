@@ -8,4 +8,4 @@ The gang is back and this time it's personal. They're here to train another RL a
 
 *slaps policy gradient* This bad boy can update so many gosh darn parameters of this *slaps roof of vanilla neural network* bad boy which knows a pretty good amount about the numbers 1-10.
 
-Stay tuned.
+Stay... tuned.
