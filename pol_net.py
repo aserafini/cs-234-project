@@ -32,72 +32,117 @@ class pol_net(nn.Module):
     self.net = net
     self.gamma = 0.9
 
-    self.window = 3
-    self.HARDCODED_INIT = -5
-    self.linear = nn.Linear(2 * self.window, 1)
-    self.linear.weight.data.fill_(len(self.net.classes)*self.HARDCODED_INIT/(2*self.window))
-    self.log_std = nn.Parameter(torch.empty(1).fill_(-8.0))
+    self.initialize_lstm()
+    self.linear = nn.Linear(self.lstm_hidden_size, 1, bias = False)
+
+    self.log_std = nn.Parameter(torch.empty(1).fill_(-2.0))
     self.saved_log_probs = []
 
     self.optimizer = torch.optim.Adam(self.parameters())
 
-  def forward(self, x):
-      x = self.linear(x)
-      return x
+  def initialize_lstm(self):
+      # note, confusing thing: 
+      # The output of an LSTM cell or layer of cells is called the hidden state. 
+      # This is confusing, because each LSTM cell retains an internal state that is not output, 
+      #  called the cell state, or c. 
+      # further, cell state and hidden state need to be the same dimensions
+      # 2 options to increase dimensionality of h, c
+      #   have them be higher dim but just use the last output of h
+      #   I think, maybe equivalently, have a stacked LSTM
 
-  def select_action(self, state):
-      state = torch.FloatTensor(state)
-      mean = self.forward(state)
+      self.lstm_input_size = 1  # [g] or [g, g^2]??
+      self.lstm_hidden_size = 8
+      # note: "batch" is all the parameters since this is elementwise for each param
+      # Input and output thus (batch, seq, feature), but sequence length is 1 for each
+      #  call since we are doing this iteratively
+      # print("hi!!!!!")
+      # state_dict = self.net.state_dict()
+      # for key in state_dict:
+      #   print("param",self.net.state_dict()[key].grad)
+      #   # print("zeros", self.net.state_dict()[key]*0)
+      #   state_dict[key].grad = self.net.state_dict()[key].grad * 0 + 1
+      #   print("post",self.net.state_dict()[key].grad)
+      #   break
+      self.hiddens = []
+      for p in self.net.parameters():
+        n_params = len(p.view(-1))
+        h0 = torch.zeros(1, n_params, self.lstm_hidden_size)
+        c0 = torch.zeros(1, n_params, self.lstm_hidden_size)
+        self.hiddens.append((h0,c0))
 
-      dist = torch.distributions.normal.Normal(mean, torch.exp(self.log_std))
-      action = dist.rsample()
+      self.lstm = nn.LSTM(
+          input_size = self.lstm_input_size,
+          hidden_size = self.lstm_hidden_size,
+          num_layers = 1,
+      )
 
-      self.saved_log_probs.append(dist.log_prob(action))
 
-      return action #.item()
+  def forward(self, vanilla_grad, hidden):
+      # print("vanilla shpae", vanilla_grad.shape)
+      # print("hidden shape", hidden[0].shape)
+      x, hidden = self.lstm(vanilla_grad, hidden)
+      chocolate_grad = self.linear(x)
+
+      return chocolate_grad, hidden
+
+  def select_actions(self, vanilla_grads):
+      chocolate_grads = []
+      tot_log_prob = 0.
+      for idx, vanilla_grad in enumerate(vanilla_grads):
+        hidden = self.hiddens[idx]
+        final_shape = vanilla_grad.shape
+
+        vanilla_grad = vanilla_grad.reshape(1, -1, 1)
+        means, hidden = self.forward(vanilla_grad, hidden)
+        means = torch.squeeze(means)
+        self.hiddens[idx] = hidden
+
+        # make list for compute graph???
+        dist = torch.distributions.normal.Normal(means, torch.exp(self.log_std))
+
+        chocolate_grad = dist.rsample()
+        tot_log_prob += dist.log_prob(chocolate_grad).sum()
+
+        chocolate_grad = chocolate_grad.reshape(final_shape)
+        chocolate_grads.append(chocolate_grad)
+
+      self.saved_log_probs.append(tot_log_prob)
+      return chocolate_grads #.item()
 
 
   def sample_trajectories(self):
       self.batch_size = 10
-      self.n_epochs = 7
+      self.n_epochs = 1
 
       episode_rewards = []
       paths = []
 
+
       for batch_idx in range(self.batch_size):
           self.net.unlearn()
 
-          base = 1.0 / len(self.net.classes)
-          state = [base for i in range(2 * self.window)] # [tr_1, te_1, tr_2, te_2, tr_3, te_3]
-          states, actions, rewards = [], [], []
+          rewards = []
           ep_reward = 0
 
+
           for epoch in range(self.n_epochs):
-              states.append(state)
-              log_lr = self.select_action(state)
+            for vanilla_grads in self.net.train_batch():
 
-              lr = torch.exp(log_lr)
-              self.net.train_epoch(epoch, lr.item())
+              chocolate_grads = self.select_actions(vanilla_grads)
 
-              train_a = self.net.train_accuracy()
-              test_a = self.net.test_accuracy()
-              print('train_a', train_a)
-              print('test_a', test_a)
+              # new_loss = self.net.take_grad_step(chocolate_grads)
+              self.net.take_grad_step(chocolate_grads)
+              new_loss = self.net.total_loss()
 
-              if self.window > 1:
-                  state = state[2:] + [train_a, test_a]
-              else:
-                  state = [train_a, test_a]
+              # FIX THIS: reward = curr_loss - new_loss
 
-              actions.append(log_lr)
-              rewards.append(test_a)
-              ep_reward += test_a
+              rewards.append(reward)
+              ep_reward += reward 
 
           episode_rewards.append(ep_reward)
 
-          path = {"observation" : np.array(states),
-                  "reward" : np.array(rewards),
-                  "action" : np.array(actions)}
+          path = {"reward" : np.array(rewards)}
+
           paths.append(path)
 
       return paths, episode_rewards            
@@ -157,8 +202,8 @@ class pol_net(nn.Module):
         paths, total_rewards = self.sample_trajectories() 
 
         scores_eval = scores_eval + total_rewards
-        observations = np.concatenate([path["observation"] for path in paths])
-        actions = np.concatenate([path["action"] for path in paths])
+        # observations = np.concatenate([path["observation"] for path in paths])
+        # actions = np.concatenate([path["action"] for path in paths])
         rewards = np.concatenate([path["reward"] for path in paths])
 
         returns = self.get_returns(paths)

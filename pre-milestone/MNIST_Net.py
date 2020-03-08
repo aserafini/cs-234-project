@@ -34,29 +34,17 @@ class MNIST_Net(nn.Module):
 		self.fc3 = nn.Linear(84, 10)
 
 		self.criterion = nn.CrossEntropyLoss() #softmax lives in here
-		self.optimizer = optim.SGD(self.parameters(), lr=1, momentum=0)
+		self.optimizer = optim.SGD(self.parameters(), lr=6969696969, momentum=0) 
 
-	# def get_weights(self):
-	# 	weights = np.zeros(len(self.parameters()))
+	def train_epoch(self, epoch, lr):
+		print('potentially less fucking stupid learning rate', lr)
+		for param_group in self.optimizer.param_groups:
+			param_group['lr'] = lr
 
-	# 	# HI, JC here:
-	# 	# faster is weights = np.array([p.data for p in self.parameters()])
-	# 	for idx, p in enumerate(self.parameters()):
-	# 		print("parameter", p)
-	# 		weights[idx] = p.data
-	# 	return weights
-
-	def take_grad_step(self, grads):
-		for idx, p in enumerate(self.parameters()):
-			p.grad = grads[idx]
-
-		self.optimizer.step()
-
-		# loss = self.criterion(outputs, labels)
-		# return loss
-
-	def train_batch(self):
+		running_loss = 0.0
+		train_loss = 0.0
 		for i, data in enumerate(self.trainloader, 0):
+			# get the inputs; data is a list of [inputs, labels]
 			inputs, labels = data
 
 			# zero the parameter gradients
@@ -66,46 +54,17 @@ class MNIST_Net(nn.Module):
 			outputs = self.forward(inputs)
 			loss = self.criterion(outputs, labels)
 			loss.backward()
+			self.optimizer.step()
 
-			grads = []
-			for p in self.parameters():
-				grads.append(p.grad)
+			# print statistics
+			running_loss += loss.item()
+			if i % 2000 == 1999:    # print every 2000 mini-batches
+				print('[%d, %5d] loss: %.3f' %
+					(epoch + 1, i + 1, running_loss / 2000))
+				train_loss += running_loss
+				running_loss = 0.0
 
-			yield grads
-
-	# def train_epoch(self, epoch, lr):
-	# 	print('potentially less fucking stupid learning rate', lr)
-	# 	for param_group in self.optimizer.param_groups:
-	# 		param_group['lr'] = lr
-
-	# 	running_loss = 0.0
-	# 	train_loss = 0.0
-	# 	for i, data in enumerate(self.trainloader, 0):
-	# 		# get the inputs; data is a list of [inputs, labels]
-	# 		inputs, labels = data
-
-	# 		# zero the parameter gradients
-	# 		self.optimizer.zero_grad()
-
-	# 		# forward + backward + optimize
-	# 		outputs = self.forward(inputs)
-	# 		loss = self.criterion(outputs, labels)
-	# 		loss.backward()
-
-	# 		self.update_gradients()
-
-	# 		self.optimizer.step()
-			
-
-	# 		# print statistics
-	# 		running_loss += loss.item()
-	# 		if i % 2000 == 1999:    # print every 2000 mini-batches
-	# 			print('[%d, %5d] loss: %.3f' %
-	# 				(epoch + 1, i + 1, running_loss / 2000))
-	# 			train_loss += running_loss
-	# 			running_loss = 0.0
-
-	# 	return train_loss / 15000
+		return train_loss / 15000
 
 	def predict(self, images):
 		with torch.no_grad():
@@ -114,17 +73,6 @@ class MNIST_Net(nn.Module):
 
 		return predicted
 
-	def total_loss(self):
-		with torch.no_grad():
-			loss = []
-			for data in self.trainloader:
-				images, labels = data
-				predicted = self.predict(images)
-				loss.append(self.criterion(predicted, labels))
-			mean_loss = np.mean(loss)
-
-		return mean_loss
-	
 	def test_accuracy(self):
 		correct = 0
 		total = 0
@@ -144,6 +92,7 @@ class MNIST_Net(nn.Module):
 			total += labels.size(0)
 			correct += (predicted == labels).sum().item()
 		return correct / total
+
 
 	def unlearn(self):
 		
