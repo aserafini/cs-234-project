@@ -50,4 +50,3 @@ model = pol_net(net, logger=None)
 print("Let's train that model!!!!")
 model.train()
 
-

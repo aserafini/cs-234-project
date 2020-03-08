@@ -36,7 +36,7 @@ class pol_net(nn.Module):
     self.HARDCODED_INIT = -5
     self.linear = nn.Linear(2 * self.window, 1)
     self.linear.weight.data.fill_(len(self.net.classes)*self.HARDCODED_INIT/(2*self.window))
-    self.log_std = nn.Parameter(torch.empty(1).fill_(-10.0))
+    self.log_std = nn.Parameter(torch.empty(1).fill_(-8.0))
     self.saved_log_probs = []
 
     self.optimizer = torch.optim.Adam(self.parameters())
@@ -58,8 +58,8 @@ class pol_net(nn.Module):
 
 
   def sample_trajectories(self):
-      self.batch_size = 1
-      self.n_epochs = 15
+      self.batch_size = 10
+      self.n_epochs = 7
 
       episode_rewards = []
       paths = []
