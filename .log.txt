@@ -13,3 +13,150 @@
 2020-02-27 23:01:44,539:INFO: Average reward: 14.31 +/- 0.00
 2020-02-27 23:13:04,073:INFO: Average reward: 14.33 +/- 0.00
 2020-02-27 23:13:04,074:INFO: - Training done.
+2020-03-08 19:31:17,250:INFO: Average reward: -0.57 +/- 0.00
+2020-03-08 19:33:20,375:INFO: Average reward: -0.43 +/- 0.00
+2020-03-08 19:38:56,036:INFO: Average reward: -150027456.00 +/- 0.00
+2020-03-08 21:02:48,346:INFO: Average reward: 1267.44 +/- 0.00
+2020-03-08 21:03:03,635:INFO: Average reward: 2609.80 +/- 0.00
+2020-03-08 21:03:18,415:INFO: Average reward: 2448.10 +/- 0.00
+2020-03-08 21:03:33,145:INFO: Average reward: 1029.50 +/- 0.00
+2020-03-08 21:03:47,960:INFO: Average reward: 2559.17 +/- 0.00
+2020-03-08 21:04:03,191:INFO: Average reward: 3635.96 +/- 0.00
+2020-03-08 21:04:18,083:INFO: Average reward: 1703.52 +/- 0.00
+2020-03-08 21:04:32,867:INFO: Average reward: 1685.19 +/- 0.00
+2020-03-08 21:04:47,742:INFO: Average reward: 1030.19 +/- 0.00
+2020-03-08 21:05:02,482:INFO: Average reward: 2560.95 +/- 0.00
+2020-03-08 21:05:02,492:INFO: - Training done.
+2020-03-08 21:06:04,535:INFO: Average reward: -68832133120.00 +/- 0.00
+2020-03-08 21:06:43,831:INFO: Average reward: -23418388480.00 +/- 0.00
+2020-03-08 21:06:58,920:INFO: Average reward: -23751409664.00 +/- 0.00
+2020-03-08 21:07:13,948:INFO: Average reward: -23882121216.00 +/- 0.00
+2020-03-08 21:07:28,916:INFO: Average reward: -23629723648.00 +/- 0.00
+2020-03-08 21:07:43,794:INFO: Average reward: -23746322432.00 +/- 0.00
+2020-03-08 21:07:59,263:INFO: Average reward: -23901962240.00 +/- 0.00
+2020-03-08 21:08:14,887:INFO: Average reward: -23090147328.00 +/- 0.00
+2020-03-08 21:08:45,066:INFO: Average reward: -0.27 +/- 0.00
+2020-03-08 21:09:00,074:INFO: Average reward: -0.13 +/- 0.00
+2020-03-08 21:09:14,964:INFO: Average reward: -0.08 +/- 0.00
+2020-03-08 21:09:30,223:INFO: Average reward: -0.13 +/- 0.00
+2020-03-08 21:09:45,059:INFO: Average reward: -0.17 +/- 0.00
+2020-03-08 21:10:00,226:INFO: Average reward: -0.11 +/- 0.00
+2020-03-08 21:10:14,884:INFO: Average reward: -0.14 +/- 0.00
+2020-03-08 21:10:29,792:INFO: Average reward: -0.30 +/- 0.00
+2020-03-08 21:10:44,650:INFO: Average reward: -0.09 +/- 0.00
+2020-03-08 21:10:59,370:INFO: Average reward: -0.19 +/- 0.00
+2020-03-08 21:10:59,379:INFO: - Training done.
+2020-03-08 21:13:56,181:INFO: Average reward: -1956.52 +/- 0.00
+2020-03-08 21:14:11,278:INFO: Average reward: -2403.81 +/- 0.00
+2020-03-08 21:14:26,833:INFO: Average reward: -1245.48 +/- 0.00
+2020-03-08 21:14:41,873:INFO: Average reward: -2032.09 +/- 0.00
+2020-03-08 21:14:56,853:INFO: Average reward: -2420.69 +/- 0.00
+2020-03-08 21:15:11,808:INFO: Average reward: -1483.70 +/- 0.00
+2020-03-08 21:15:26,872:INFO: Average reward: -2688.40 +/- 0.00
+2020-03-08 21:15:41,892:INFO: Average reward: -2538.45 +/- 0.00
+2020-03-08 21:15:56,838:INFO: Average reward: -663.43 +/- 0.00
+2020-03-08 21:16:11,827:INFO: Average reward: -2292.49 +/- 0.00
+2020-03-08 21:16:11,834:INFO: - Training done.
+2020-03-08 21:22:11,112:INFO: Average reward: 93338.59 +/- 0.00
+2020-03-08 21:22:26,926:INFO: Average reward: 27419.41 +/- 0.00
+2020-03-08 21:22:55,602:INFO: Average reward: 93338.59 +/- 0.00
+2020-03-08 21:23:10,334:INFO: Average reward: 27419.41 +/- 0.00
+2020-03-08 21:23:25,038:INFO: Average reward: 104730.93 +/- 0.00
+2020-03-08 21:23:39,741:INFO: Average reward: 71664.60 +/- 0.00
+2020-03-08 21:23:54,375:INFO: Average reward: 42783.98 +/- 0.00
+2020-03-08 21:24:09,326:INFO: Average reward: 44592.68 +/- 0.00
+2020-03-08 21:24:24,519:INFO: Average reward: 62868.05 +/- 0.00
+2020-03-08 21:25:02,249:INFO: Average reward: 93338.59 +/- 0.00
+2020-03-08 21:25:17,814:INFO: Average reward: 27419.41 +/- 0.00
+2020-03-08 21:25:33,829:INFO: Average reward: 104730.93 +/- 0.00
+2020-03-08 21:25:48,978:INFO: Average reward: 71664.60 +/- 0.00
+2020-03-08 21:26:04,148:INFO: Average reward: 42783.98 +/- 0.00
+2020-03-08 21:26:19,233:INFO: Average reward: 44592.68 +/- 0.00
+2020-03-08 21:27:21,001:INFO: Average reward: 93338.59 +/- 0.00
+2020-03-08 21:27:36,222:INFO: Average reward: 34685.73 +/- 0.00
+2020-03-08 22:19:16,476:INFO: Average reward: 93338.59 +/- 0.00
+2020-03-08 22:19:49,834:INFO: Average reward: 93338.59 +/- 0.00
+2020-03-08 22:20:05,688:INFO: Average reward: 27419.41 +/- 0.00
+2020-03-08 22:20:20,475:INFO: Average reward: 104730.93 +/- 0.00
+2020-03-08 22:20:35,657:INFO: Average reward: 71664.60 +/- 0.00
+2020-03-08 22:20:50,426:INFO: Average reward: 42783.98 +/- 0.00
+2020-03-08 22:20:50,433:INFO: - Training done.
+2020-03-08 22:21:11,111:INFO: Average reward: 93338.59 +/- 0.00
+2020-03-08 22:21:26,005:INFO: Average reward: 27419.41 +/- 0.00
+2020-03-08 22:21:40,948:INFO: Average reward: 104730.93 +/- 0.00
+2020-03-08 22:21:55,893:INFO: Average reward: 71664.60 +/- 0.00
+2020-03-08 22:22:10,872:INFO: Average reward: 42783.98 +/- 0.00
+2020-03-08 22:22:10,880:INFO: - Training done.
+2020-03-08 22:25:09,394:INFO: Average reward: 0.16 +/- 0.00
+2020-03-08 22:28:10,583:INFO: Average reward: 0.16 +/- 0.00
+2020-03-08 22:28:33,926:INFO: Average reward: 0.16 +/- 0.00
+2020-03-08 22:28:56,827:INFO: Average reward: 0.17 +/- 0.00
+2020-03-08 22:29:19,783:INFO: Average reward: 0.17 +/- 0.00
+2020-03-08 22:29:43,765:INFO: Average reward: 0.21 +/- 0.00
+2020-03-08 22:29:43,773:INFO: - Training done.
+2020-03-08 22:32:06,742:INFO: Average reward: 0.16 +/- 0.00
+2020-03-08 22:32:29,787:INFO: Average reward: 0.16 +/- 0.00
+2020-03-08 22:32:53,568:INFO: Average reward: 0.17 +/- 0.00
+2020-03-08 22:33:16,651:INFO: Average reward: 0.17 +/- 0.00
+2020-03-08 22:33:41,966:INFO: Average reward: 0.21 +/- 0.00
+2020-03-08 22:33:41,974:INFO: - Training done.
+2020-03-08 22:36:14,080:INFO: Average reward: 0.16 +/- 0.00
+2020-03-08 22:36:39,417:INFO: Average reward: 0.16 +/- 0.00
+2020-03-08 22:37:06,402:INFO: Average reward: 0.17 +/- 0.00
+2020-03-08 22:41:48,265:INFO: Average reward: 0.26 +/- 0.04
+2020-03-08 22:41:48,372:INFO: - Training done.
+2020-03-08 22:43:49,858:INFO: Average reward: -6.36 +/- 0.00
+2020-03-08 22:44:12,857:INFO: Average reward: -8.06 +/- 0.00
+2020-03-08 22:44:36,166:INFO: Average reward: -4.55 +/- 0.00
+2020-03-08 22:44:59,300:INFO: Average reward: -5.75 +/- 0.00
+2020-03-08 22:45:22,113:INFO: Average reward: -11.04 +/- 0.00
+2020-03-08 22:45:22,121:INFO: - Training done.
+2020-03-08 22:46:57,810:INFO: Average reward: -6.36 +/- 0.00
+2020-03-08 22:47:21,364:INFO: Average reward: -8.06 +/- 0.00
+2020-03-08 22:47:45,687:INFO: Average reward: -4.55 +/- 0.00
+2020-03-08 22:48:09,645:INFO: Average reward: -5.75 +/- 0.00
+2020-03-08 22:48:32,705:INFO: Average reward: -11.04 +/- 0.00
+2020-03-08 22:48:32,712:INFO: - Training done.
+2020-03-08 22:49:37,486:INFO: Average reward: 93338.59 +/- 0.00
+2020-03-08 22:50:00,744:INFO: Average reward: 78470.65 +/- 0.00
+2020-03-08 22:53:40,279:INFO: Average reward: -0.73 +/- 0.10
+2020-03-08 22:54:43,216:INFO: Average reward: -0.62 +/- 0.10
+2020-03-08 22:55:42,646:INFO: Average reward: -0.60 +/- 0.22
+2020-03-08 22:56:46,314:INFO: Average reward: -0.35 +/- 0.25
+2020-03-08 22:57:45,350:INFO: Average reward: -0.37 +/- 0.10
+2020-03-08 22:57:45,375:INFO: - Training done.
+2020-03-08 23:01:02,915:INFO: Average reward: -0.73 +/- 0.10
+2020-03-08 23:02:00,398:INFO: Average reward: -0.62 +/- 0.10
+2020-03-08 23:02:59,789:INFO: Average reward: -0.60 +/- 0.22
+2020-03-08 23:03:57,367:INFO: Average reward: -0.35 +/- 0.25
+2020-03-08 23:04:52,649:INFO: Average reward: -0.37 +/- 0.10
+2020-03-08 23:04:52,676:INFO: - Training done.
+2020-03-08 23:10:26,682:INFO: Average reward: -0.73 +/- 0.10
+2020-03-08 23:11:43,143:INFO: Average reward: -0.73 +/- 0.10
+2020-03-08 23:12:38,962:INFO: Average reward: -0.62 +/- 0.10
+2020-03-08 23:13:39,959:INFO: Average reward: -0.60 +/- 0.22
+2020-03-08 23:14:45,871:INFO: Average reward: -0.35 +/- 0.25
+2020-03-08 23:15:46,683:INFO: Average reward: -0.37 +/- 0.10
+2020-03-08 23:15:46,710:INFO: - Training done.
+2020-03-08 23:17:18,893:INFO: Average reward: -0.73 +/- 0.10
+2020-03-08 23:18:15,273:INFO: Average reward: -0.62 +/- 0.10
+2020-03-08 23:19:12,750:INFO: Average reward: -0.60 +/- 0.22
+2020-03-08 23:20:13,723:INFO: Average reward: -0.35 +/- 0.25
+2020-03-08 23:22:16,051:INFO: Average reward: -0.73 +/- 0.10
+2020-03-08 23:23:14,158:INFO: Average reward: -0.62 +/- 0.10
+2020-03-08 23:24:13,543:INFO: Average reward: -0.60 +/- 0.22
+2020-03-08 23:25:17,238:INFO: Average reward: -0.35 +/- 0.25
+2020-03-08 23:26:15,254:INFO: Average reward: -0.37 +/- 0.10
+2020-03-08 23:26:15,279:INFO: - Training done.
+2020-03-08 23:31:55,307:INFO: Average reward: -29085.78 +/- 16186.00
+2020-03-08 23:32:51,412:INFO: Average reward: 7921.65 +/- 9715.68
+2020-03-08 23:33:47,255:INFO: Average reward: -7490.95 +/- 4658.01
+2020-03-08 23:34:44,264:INFO: Average reward: -18372.51 +/- 7432.46
+2020-03-08 23:35:41,085:INFO: Average reward: -17800.81 +/- 6722.43
+2020-03-08 23:35:41,114:INFO: - Training done.
+2020-03-08 23:39:40,677:INFO: Average reward: -358125088.00 +/- 171158126.72
+2020-03-08 23:40:50,913:INFO: Average reward: -342939936.00 +/- 162372120.21
+2020-03-08 23:42:04,057:INFO: Average reward: -380972256.00 +/- 181502201.45
+2020-03-08 23:43:16,026:INFO: Average reward: -340753376.00 +/- 160441051.50
+2020-03-08 23:44:26,649:INFO: Average reward: -369434912.00 +/- 172767638.48
+2020-03-08 23:44:26,675:INFO: - Training done.

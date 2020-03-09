@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import logging
+import time
 
 def get_logger(filename):
   """
@@ -30,7 +31,10 @@ class pol_net(nn.Module):
       self.logger = logger
 
     self.net = net
-    self.gamma = 0.9
+    self.gamma = 1.0
+
+    self.num_trainings = 1
+    self.num_epochs = 3
 
     self.initialize_lstm()
     self.linear = nn.Linear(self.lstm_hidden_size, 1, bias = False)
@@ -39,6 +43,17 @@ class pol_net(nn.Module):
     self.saved_log_probs = []
 
     self.optimizer = torch.optim.Adam(self.parameters())
+
+  def initialize_hidden(self):
+    self.hiddens_list = []
+    for idx in range(self.num_trainings):
+      hiddens = []
+      for p in self.net.parameters():
+        n_params = len(p.view(-1))
+        h0 = torch.zeros(1, n_params, self.lstm_hidden_size)
+        c0 = torch.zeros(1, n_params, self.lstm_hidden_size)
+        hiddens.append((h0,c0))
+      self.hiddens_list.append(hiddens) 
 
   def initialize_lstm(self):
       # note, confusing thing: 
@@ -51,7 +66,8 @@ class pol_net(nn.Module):
       #   I think, maybe equivalently, have a stacked LSTM
 
       self.lstm_input_size = 1  # [g] or [g, g^2]??
-      self.lstm_hidden_size = 8
+      self.lstm_hidden_size = 1
+
       # note: "batch" is all the parameters since this is elementwise for each param
       # Input and output thus (batch, seq, feature), but sequence length is 1 for each
       #  call since we are doing this iteratively
@@ -63,13 +79,8 @@ class pol_net(nn.Module):
       #   state_dict[key].grad = self.net.state_dict()[key].grad * 0 + 1
       #   print("post",self.net.state_dict()[key].grad)
       #   break
-      self.hiddens = []
-      for p in self.net.parameters():
-        n_params = len(p.view(-1))
-        h0 = torch.zeros(1, n_params, self.lstm_hidden_size)
-        c0 = torch.zeros(1, n_params, self.lstm_hidden_size)
-        self.hiddens.append((h0,c0))
-
+      
+      self.initialize_hidden()   
       self.lstm = nn.LSTM(
           input_size = self.lstm_input_size,
           hidden_size = self.lstm_hidden_size,
@@ -85,19 +96,18 @@ class pol_net(nn.Module):
 
       return chocolate_grad, hidden
 
-  def select_actions(self, vanilla_grads):
+  def select_actions(self, vanilla_grads, training_it):
       chocolate_grads = []
       tot_log_prob = 0.
       for idx, vanilla_grad in enumerate(vanilla_grads):
-        hidden = self.hiddens[idx]
+        hidden = self.hiddens_list[training_it][idx]
         final_shape = vanilla_grad.shape
 
         vanilla_grad = vanilla_grad.reshape(1, -1, 1)
         means, hidden = self.forward(vanilla_grad, hidden)
         means = torch.squeeze(means)
-        self.hiddens[idx] = hidden
+        self.hiddens_list[training_it][idx] = hidden
 
-        # make list for compute graph???
         dist = torch.distributions.normal.Normal(means, torch.exp(self.log_std))
 
         chocolate_grad = dist.rsample()
@@ -111,39 +121,46 @@ class pol_net(nn.Module):
 
 
   def sample_trajectories(self):
-      self.batch_size = 10
-      self.n_epochs = 1
-
       episode_rewards = []
       paths = []
 
-
-      for batch_idx in range(self.batch_size):
+      for training_it in range(self.num_trainings):
           self.net.unlearn()
 
-          rewards = []
-          ep_reward = 0
+          for epoch in range(self.num_epochs):
 
+            rewards = []
+            ep_reward = 0
 
-          for epoch in range(self.n_epochs):
-            for vanilla_grads in self.net.train_batch():
+            for vanilla_grads, pre_loss, images, labels in self.net.train_batch():
 
-              chocolate_grads = self.select_actions(vanilla_grads)
+              chocolate_grads = self.select_actions(vanilla_grads, training_it)
 
-              # new_loss = self.net.take_grad_step(chocolate_grads)
               self.net.take_grad_step(chocolate_grads)
-              new_loss = self.net.total_loss()
 
-              # FIX THIS: reward = curr_loss - new_loss
+              # with torch.no_grad():
+              #   print('vanilla grad norm', torch.norm(vanilla_grads[0], 2))
+              #   print('choc grad norm', torch.norm(chocolate_grads[0], 2))
+              # # for debugging!!!
+              # self.net.take_grad_step(vanilla_grads)
 
+              with torch.no_grad():
+                logits = self.net.forward(images)
+                post_loss = self.net.criterion(logits, labels)
+
+              reward = pre_loss.data - post_loss.data
+
+              # print(reward)
               rewards.append(reward)
               ep_reward += reward 
 
-          episode_rewards.append(ep_reward)
+            episode_rewards.append(ep_reward)
+            path = {"reward" : np.array(rewards)}
 
-          path = {"reward" : np.array(rewards)}
+            paths.append(path)
 
-          paths.append(path)
+            print('training iter', training_it, 'epoch', epoch)
+            print('training acc', self.net.train_accuracy(), 'test acc', self.net.test_accuracy())  
 
       return paths, episode_rewards            
 
@@ -164,14 +181,15 @@ class pol_net(nn.Module):
         returns.reverse()
 
         all_returns.append(returns)
-      returns = np.concatenate(all_returns)
 
+      returns = np.concatenate(all_returns)
       return returns
 
   def update_pol(self, returns):
     normed_returns = (returns-np.mean(returns))/(np.std(returns)+1e-10)
     policy_loss = -1 * (self.saved_log_probs * normed_returns).sum()
-    print("policy loss", policy_loss)
+    print("policy loss", policy_loss.data)
+    print("std", torch.exp(self.log_std).data)
 
     self.optimizer.zero_grad()
     policy_loss.backward()
@@ -197,30 +215,36 @@ class pol_net(nn.Module):
 
       self.num_batches = 5
       for t in range(self.num_batches):
+        start = time.time()
         print("batch ", t)
         # collect a minibatch of samples
-        paths, total_rewards = self.sample_trajectories() 
+        paths, episode_rewards = self.sample_trajectories() 
 
-        scores_eval = scores_eval + total_rewards
-        # observations = np.concatenate([path["observation"] for path in paths])
-        # actions = np.concatenate([path["action"] for path in paths])
+        scores_eval = scores_eval + episode_rewards
         rewards = np.concatenate([path["reward"] for path in paths])
 
         returns = self.get_returns(paths)
-        
         self.update_pol(returns)
 
         # compute reward statistics for this batch and log
-        avg_reward = np.mean(total_rewards)
-        sigma_reward = np.sqrt(np.var(total_rewards) / len(total_rewards))
+        avg_reward = np.mean(episode_rewards)
+        sigma_reward = np.sqrt(np.var(episode_rewards) / len(episode_rewards))
         msg = "Average reward: {:04.2f} +/- {:04.2f}".format(avg_reward, sigma_reward)
         self.logger.info(msg)
+
+        self.initialize_hidden()
+        # for hiddens in self.hiddens_list:
+        #   for tensor in hiddens:
+        #     tensor[0].detach_()
+        #     tensor[1].detach_()
 
         # if  self.config.record and (last_record > self.config.record_freq):
         #   self.logger.info("Recording...")
         #   last_record =0
         #   self.record()
-
+        end = time.time()
+        #print('batch ' + str(t) +  ' took : ' + str(-start + end))
       self.logger.info("- Training done.")
+
       #export_plot(scores_eval, "Score", self.config.env_name, self.config.plot_output)
 

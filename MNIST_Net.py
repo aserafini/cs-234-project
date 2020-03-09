@@ -7,6 +7,8 @@ import torch.nn.functional as F
 
 import torch.optim as optim
 
+import numpy as np
+
 class MNIST_Net(nn.Module):
 
 	def __init__(self):
@@ -19,12 +21,12 @@ class MNIST_Net(nn.Module):
 
 		trainset = torchvision.datasets.MNIST(root='./data', train=True,
 			download=True, transform=transform)
-		self.trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
+		self.trainloader = torch.utils.data.DataLoader(trainset, batch_size=1024,
 			shuffle=True, num_workers=0)
 
 		testset = torchvision.datasets.MNIST(root='./data', train=False,
 			download=True, transform=transform)
-		self.testloader = torch.utils.data.DataLoader(testset, batch_size=4,
+		self.testloader = torch.utils.data.DataLoader(testset, batch_size=1024,
 			shuffle=False, num_workers=0)
 
 		self.classes = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
@@ -48,79 +50,53 @@ class MNIST_Net(nn.Module):
 
 	def take_grad_step(self, grads):
 		for idx, p in enumerate(self.parameters()):
-			p.grad = grads[idx]
+			p.grad = grads[idx].clone()
 
 		self.optimizer.step()
 
-		# loss = self.criterion(outputs, labels)
-		# return loss
-
 	def train_batch(self):
 		for i, data in enumerate(self.trainloader, 0):
-			inputs, labels = data
+			images, labels = data
 
 			# zero the parameter gradients
 			self.optimizer.zero_grad()
 
 			# forward + backward + optimize
-			outputs = self.forward(inputs)
-			loss = self.criterion(outputs, labels)
+			logits = self.forward(images)
+			loss = self.criterion(logits, labels)
 			loss.backward()
 
 			grads = []
 			for p in self.parameters():
 				grads.append(p.grad)
 
-			yield grads
-
-	# def train_epoch(self, epoch, lr):
-	# 	print('potentially less fucking stupid learning rate', lr)
-	# 	for param_group in self.optimizer.param_groups:
-	# 		param_group['lr'] = lr
-
-	# 	running_loss = 0.0
-	# 	train_loss = 0.0
-	# 	for i, data in enumerate(self.trainloader, 0):
-	# 		# get the inputs; data is a list of [inputs, labels]
-	# 		inputs, labels = data
-
-	# 		# zero the parameter gradients
-	# 		self.optimizer.zero_grad()
-
-	# 		# forward + backward + optimize
-	# 		outputs = self.forward(inputs)
-	# 		loss = self.criterion(outputs, labels)
-	# 		loss.backward()
-
-	# 		self.update_gradients()
-
-	# 		self.optimizer.step()
-			
-
-	# 		# print statistics
-	# 		running_loss += loss.item()
-	# 		if i % 2000 == 1999:    # print every 2000 mini-batches
-	# 			print('[%d, %5d] loss: %.3f' %
-	# 				(epoch + 1, i + 1, running_loss / 2000))
-	# 			train_loss += running_loss
-	# 			running_loss = 0.0
-
-	# 	return train_loss / 15000
+			yield grads, loss, images, labels
 
 	def predict(self, images):
 		with torch.no_grad():
-			outputs = self.forward(images)
-			_, predicted = torch.max(outputs.data, 1)
+			logits = self.forward(images)
+			_, predicted = torch.max(logits.data, 1)
 
 		return predicted
+	
+	def test_loss(self):
+		with torch.no_grad():
+			loss = []
+			for data in self.testloader:
+				images, labels = data
+				logits = self.forward(images)
+				loss.append(self.criterion(logits, labels))
+			mean_loss = np.mean(loss)
 
-	def total_loss(self):
+		return mean_loss
+
+	def train_loss(self):
 		with torch.no_grad():
 			loss = []
 			for data in self.trainloader:
 				images, labels = data
-				predicted = self.predict(images)
-				loss.append(self.criterion(predicted, labels))
+				logits = self.forward(images)
+				loss.append(self.criterion(logits, labels))
 			mean_loss = np.mean(loss)
 
 		return mean_loss

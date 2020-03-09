@@ -8,11 +8,12 @@ from pol_net import pol_net
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import time
 
 
 
 # np.random.seed(69)
-# torch.manual_seed(69)
+torch.manual_seed(2)
 
 # 
 
@@ -46,6 +47,12 @@ import matplotlib.pyplot as plt
 # plt.legend()
 # plt.savefig('mnist.png')
 net = MNIST_Net()
+# start = time.time()
+# net.train_accuracy()
+# end = time.time()
+# num_batches = len(net.trainloader)
+# print(((end-start)*num_batches)/60.0)
+
 model = pol_net(net, logger=None)
 print("Let's train that model!!!!")
 model.train()
