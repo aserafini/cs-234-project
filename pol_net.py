@@ -34,12 +34,12 @@ class pol_net(nn.Module):
     self.gamma = 1.0
 
     self.num_trainings = 1
-    self.num_epochs = 3
+    self.num_epochs = 20
 
     self.initialize_lstm()
     self.linear = nn.Linear(self.lstm_hidden_size, 1, bias = False)
 
-    self.log_std = nn.Parameter(torch.empty(1).fill_(-2.0))
+    self.log_std = nn.Parameter(torch.empty(1).fill_(-2))
     self.saved_log_probs = []
 
     self.optimizer = torch.optim.Adam(self.parameters())
@@ -50,8 +50,8 @@ class pol_net(nn.Module):
       hiddens = []
       for p in self.net.parameters():
         n_params = len(p.view(-1))
-        h0 = torch.zeros(1, n_params, self.lstm_hidden_size)
-        c0 = torch.zeros(1, n_params, self.lstm_hidden_size)
+        h0 = torch.ones(1, n_params, self.lstm_hidden_size)
+        c0 = torch.ones(1, n_params, self.lstm_hidden_size)
         hiddens.append((h0,c0))
       self.hiddens_list.append(hiddens) 
 
@@ -89,10 +89,12 @@ class pol_net(nn.Module):
 
 
   def forward(self, vanilla_grad, hidden):
-      # print("vanilla shpae", vanilla_grad.shape)
-      # print("hidden shape", hidden[0].shape)
-      x, hidden = self.lstm(vanilla_grad, hidden)
-      chocolate_grad = self.linear(x)
+      # x, hidden = self.lstm(vanilla_grad, hidden)
+      # chocolate_grad = self.linear(x)
+      # print("v grad", vanilla_grad)
+      chocolate_grad = self.linear(vanilla_grad)
+      # print("choco grad", chocolate_grad)
+      # chocolate_grad = vanilla_grad
 
       return chocolate_grad, hidden
 
@@ -117,6 +119,7 @@ class pol_net(nn.Module):
         chocolate_grads.append(chocolate_grad)
 
       self.saved_log_probs.append(tot_log_prob)
+
       return chocolate_grads #.item()
 
 
@@ -126,11 +129,14 @@ class pol_net(nn.Module):
 
       for training_it in range(self.num_trainings):
           self.net.unlearn()
+          
+          # investigate this tabbing !!!
+          rewards = []
+          ep_reward = 0
 
           for epoch in range(self.num_epochs):
 
-            rewards = []
-            ep_reward = 0
+
 
             for vanilla_grads, pre_loss, images, labels in self.net.train_batch():
 
@@ -142,25 +148,35 @@ class pol_net(nn.Module):
               #   print('vanilla grad norm', torch.norm(vanilla_grads[0], 2))
               #   print('choc grad norm', torch.norm(chocolate_grads[0], 2))
               # # for debugging!!!
-              # self.net.take_grad_step(vanilla_grads)
+
+              # self.net.take_grad_step(vanilla_grads, alpha = .01)
 
               with torch.no_grad():
                 logits = self.net.forward(images)
                 post_loss = self.net.criterion(logits, labels)
 
-              reward = pre_loss.data - post_loss.data
+              if isinstance(post_loss, np.float64):
+                reward = - post_loss
+                # reward = 4
+                # reward = -np.linalg.norm((chocolate_grads[0].detach() - vanilla_grads[0].detach() * .01).numpy())
+              else:
+                reward = - post_loss.data
+                # reward = pre_loss.data - post_loss.data
+                 # pre_loss - post_loss
 
               # print(reward)
               rewards.append(reward)
-              ep_reward += reward 
+              ep_reward += reward
 
-            episode_rewards.append(ep_reward)
-            path = {"reward" : np.array(rewards)}
+          # this tabbing for ellipse time.. maybe???
+          episode_rewards.append(ep_reward)
+          # print(ep_reward)
+          path = {"reward" : np.array(rewards)}
 
-            paths.append(path)
+          paths.append(path)
 
-            print('training iter', training_it, 'epoch', epoch)
-            print('training acc', self.net.train_accuracy(), 'test acc', self.net.test_accuracy())  
+            # print('training iter', training_it, 'epoch', epoch)
+            # print('training acc', self.net.train_accuracy(), 'test acc', self.net.test_accuracy())  
 
       return paths, episode_rewards            
 
@@ -187,13 +203,21 @@ class pol_net(nn.Module):
 
   def update_pol(self, returns):
     normed_returns = (returns-np.mean(returns))/(np.std(returns)+1e-10)
+    # print(normed_returns)
+    # print(len(self.saved_log_probs))
+    # print(len(normed_returns))
     policy_loss = -1 * (self.saved_log_probs * normed_returns).sum()
-    print("policy loss", policy_loss.data)
-    print("std", torch.exp(self.log_std).data)
 
+    for name, p in self.named_parameters():
+      print(name)
+      print(p.data)
     self.optimizer.zero_grad()
     policy_loss.backward()
     self.optimizer.step()
+    for name, p in self.named_parameters():
+      print(name)
+      print(p.data)
+    # poop = pee
 
     self.saved_log_probs = []
 
@@ -213,12 +237,19 @@ class pol_net(nn.Module):
 
       scores_eval = [] # list of scores computed at iteration time
 
-      self.num_batches = 5
+      self.num_batches = 1005
       for t in range(self.num_batches):
         start = time.time()
         print("batch ", t)
         # collect a minibatch of samples
-        paths, episode_rewards = self.sample_trajectories() 
+        paths, episode_rewards = self.sample_trajectories()
+        # print(paths)
+        # print(episode_rewards) 
+
+        # for hiddens in self.hiddens_list:
+        #   for tensor in hiddens:
+        #     print(tensor[0])
+        #     print(tensor[1])
 
         scores_eval = scores_eval + episode_rewards
         rewards = np.concatenate([path["reward"] for path in paths])
