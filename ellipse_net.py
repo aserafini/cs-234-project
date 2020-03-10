@@ -64,12 +64,14 @@ class Ellipse_Net(nn.Module):
 		self.height_boundary = 5 
 
 		self.descent_paths = []
-		self.current_descent = [[-15], [-15]]
+		# self.current_descent = [[-15], [-15]]
 		self.resets = 0
 
 		# maybe modify this init later
-		# self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
-		self.weights = np.array([-15., -15.],)
+		self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
+		# self.start = self.weights
+		self.current_descent = [[self.weights[0]], [self.weights[1]]]
+		# self.weights = np.array([-15., -15.],)
 
 		if self.num_means == 1:
 			self.ell = Ellipse(self.landscape_dim)
@@ -112,7 +114,7 @@ class Ellipse_Net(nn.Module):
 			# im = ax.imshow(fun_map)
 			plt.imshow(fun_map)
 			plt.colorbar()
-			plt.scatter(-15, -15)
+			# plt.scatter(-15, -15)
 			# ax.set_xticks(range(40))
 			# ax.set_xticklabels(np.arange(-2 * self.mean_boundary, 2 * self.mean_boundary, 5))
 			# ax.set_yticklabels(np.arange(-2 * self.mean_boundary, 2 * self.mean_boundary, 5))
@@ -120,7 +122,7 @@ class Ellipse_Net(nn.Module):
 			# ax.set_ylim(bottom = -2 * self.mean_boundary, top = 2 * self.mean_boundary)
 			# fig.colorbar(im)
 
-			plt.savefig('landscape.png')
+			plt.savefig('plots/landscape.png')
 			plt.close()
 
 		return	
@@ -154,8 +156,9 @@ class Ellipse_Net(nn.Module):
 		yield grads, loss, images, labels
 
 	def criterion(self, logits, labels):
-		# loss = self.evaluate(self.weights)
-		loss = np.linalg.norm(self.weights - np.array([-15.,-15.]))
+		loss = self.evaluate(self.weights)
+		# print(loss)
+		# loss = np.linalg.norm(self.weights - np.array([-15.,-15.]))
 		# loss = np.linalg.norm(self.weights - np.array([-30.,-30.]))
 		return loss
 
@@ -217,8 +220,11 @@ class Ellipse_Net(nn.Module):
 		# self.descent_paths.append(self.current_descent)
 		if self.resets % 100 == 1:
 			self.plot_descent_paths()
-		self.current_descent = [[-15], [-15]]
-		self.weights = np.array([-15., -15.],)
+		# self.current_descent = [[-15], [-15]]
+		# self.weights = np.array([-15., -15.],)
+
+		self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
+		self.current_descent = [[self.weights[0]], [self.weights[1]]]
 		self.resets += 1
 
 
@@ -235,13 +241,20 @@ class Ellipse_Net(nn.Module):
 		return None
 
 	def plot_descent_paths(self):
-		print("cur de", self.current_descent[0])
+		print("current descent", self.current_descent[0])
 		c=next(color)
-		plt.plot(self.current_descent[0], self.current_descent[1], c=c)
-		plt.scatter(-15, -15, s= 200, c = "black")
-		plt.scatter(self.ell.m[0], self.ell.m[1], s= 200, c = "black")
 
+		# plt.scatter(-15, -15, s= 200, c = "black")
+		plt.scatter(self.current_descent[0][0], self.current_descent[1][0], s=100, c='black')
+		plt.text(self.current_descent[0][0]+0.1, self.current_descent[1][0]+0.1, 'start', fontsize=9)
 
+		plt.scatter(self.ell.m[0], self.ell.m[1], s= 100, c = "black")
+		plt.text(self.ell.m[0]+0.1, self.ell.m[1]+0.1, 'min', fontsize=9)
+
+		plt.scatter(self.current_descent[0], self.current_descent[1], c=c)
+
+		plt.savefig('plots/descent' + str(self.resets) + '.png')
+		plt.close()
 
 
 # landscape.ellipse_list[0].m = np.array([-10., -10])
@@ -253,9 +266,24 @@ landscape.plot(save=True)
 plt.close()
 color=iter(cm.cool(np.linspace(0,1,12)))
 model = pol_net(landscape, logger=None)
+print(model.net.ell.height)
 print("Let's train that model!!!!")
 model.train()
+
+# print(model.avg_rewards)
+# print(model.sigma_rewards)
 # landscape.plot_descent_paths()
-plt.savefig('descent_paths')
+plt.savefig('plots/descent_paths')
+
+plt.close()
+plt.plot(model.avg_rewards)
+plt.savefig('plots/avg_rewards')
+
+plt.close()
+plt.plot(model.lin_weights)
+plt.savefig('plots/lin_weights')
+
+
+
 
 
