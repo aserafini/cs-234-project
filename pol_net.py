@@ -3,6 +3,7 @@ import torch.nn as nn
 import numpy as np
 import logging
 import time
+import math
 
 def get_logger(filename):
   """
@@ -34,12 +35,12 @@ class pol_net(nn.Module):
     self.gamma = 1.0
 
     self.num_trainings = 1
-    self.num_epochs = 20
+    self.num_epochs = 2
 
     self.initialize_lstm()
     self.linear = nn.Linear(self.lstm_hidden_size, 1, bias = False)
 
-    self.log_std = nn.Parameter(torch.empty(1).fill_(-2))
+    self.log_std = nn.Parameter(torch.empty(1).fill_(-5))
     self.saved_log_probs = []
 
     self.optimizer = torch.optim.Adam(self.parameters())
@@ -111,10 +112,20 @@ class pol_net(nn.Module):
         self.hiddens_list[training_it][idx] = hidden
 
         dist = torch.distributions.normal.Normal(means, torch.exp(self.log_std))
+        chocolate_grad = dist.sample()
 
-        chocolate_grad = dist.rsample()
+        # trying reparameterization:
+        # zeros = torch.zeros(len(means.data))
+        # noise_dist  = torch.distributions.normal.Normal(zeros, 1)
+        # noise = noise_dist.rsample()
+        # chocolate_grad = noise*torch.exp(self.log_std) + means
+
+        grads_dist = torch.distributions.normal.Normal(means, torch.exp(self.log_std))
         tot_log_prob += dist.log_prob(chocolate_grad).sum()
-
+        # log_probs = torch.log(1/(torch.exp(self.log_std)*math.sqrt(2*math.pi))) - 1/2 * (chocolate_grad - means)**2 / torch.exp(self.log_std)**2
+        # log_probs = torch.log(1/(torch.exp(self.log_std)*math.sqrt(2*math.pi))) - 1/2 * (chocolate_grad - means)**2 / torch.exp(self.log_std)**2
+        # tot_log_prob += log_probs.sum()
+        # print("tot log prob", log_probs)
         chocolate_grad = chocolate_grad.reshape(final_shape)
         chocolate_grads.append(chocolate_grad)
 
@@ -141,7 +152,8 @@ class pol_net(nn.Module):
             for vanilla_grads, pre_loss, images, labels in self.net.train_batch():
 
               chocolate_grads = self.select_actions(vanilla_grads, training_it)
-
+              # print("vanilla grads", vanilla_grads)
+              # print("chocolate grads", chocolate_grads)
               self.net.take_grad_step(chocolate_grads)
 
               # with torch.no_grad():
@@ -203,20 +215,25 @@ class pol_net(nn.Module):
 
   def update_pol(self, returns):
     normed_returns = (returns-np.mean(returns))/(np.std(returns)+1e-10)
-    # print(normed_returns)
     # print(len(self.saved_log_probs))
     # print(len(normed_returns))
     policy_loss = -1 * (self.saved_log_probs * normed_returns).sum()
+    
+    print("policy loss", policy_loss)
 
-    for name, p in self.named_parameters():
-      print(name)
-      print(p.data)
+    # for name, p in self.named_parameters():
+    #   if "linear" in name:
+    #     print("lin before", p.data)
+    
     self.optimizer.zero_grad()
     policy_loss.backward()
-    self.optimizer.step()
     for name, p in self.named_parameters():
-      print(name)
-      print(p.data)
+      if "linear" in name:
+        print("lin grad", p.grad)
+    self.optimizer.step()
+    # for name, p in self.named_parameters():
+    #   if "linear" in name:
+    #     print("lin after", p.data)
     # poop = pee
 
     self.saved_log_probs = []
