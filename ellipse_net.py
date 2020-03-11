@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 from pol_net import pol_net
 from matplotlib.pyplot import cm
 
+import logging
+
 def get_pos_normal(mean, std):
 	x = -1.
 	while x <= 0:
@@ -64,14 +66,14 @@ class Ellipse_Net(nn.Module):
 		self.height_boundary = 5 
 
 		self.descent_paths = []
-		# self.current_descent = [[-15], [-15]]
 		self.resets = 0
+		self.plot_freq = 1000
 
 		# maybe modify this init later
-		self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
-		# self.start = self.weights
+		#self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
+
+		self.weights = np.array([-15., -15.],)
 		self.current_descent = [[self.weights[0]], [self.weights[1]]]
-		# self.weights = np.array([-15., -15.],)
 
 		if self.num_means == 1:
 			self.ell = Ellipse(self.landscape_dim)
@@ -130,149 +132,79 @@ class Ellipse_Net(nn.Module):
 	def take_grad_step(self, grads, alpha = 1.):
 		self.weights -= alpha * (grads[0]).data.numpy()
 
-		# self.weights -= np.array([0., 0.])
-
 		self.current_descent[0].append(self.weights[0])
 		self.current_descent[1].append(self.weights[1])
 
 	def train_batch(self):
-		# for i, data in enumerate(self.trainloader, 0):
 
 		images, labels = None, None
 
-		# zero the parameter gradients
-		# self.optimizer.zero_grad()
-
-		# forward + backward + optimize
-		# logits = self.forward(images)
-		# loss = self.criterion(logits, labels)
-		# loss.backward()
 		loss = self.evaluate(self.weights)
 		grads = [self.grad(self.weights)]
-		# grads = []
-		# for p in self.parameters():
-		# 	grads.append(p.grad)
 
 		yield grads, loss, images, labels
 
 	def criterion(self, logits, labels):
 		loss = self.evaluate(self.weights)
-		# print(loss)
-		# loss = np.linalg.norm(self.weights - np.array([-15.,-15.]))
-		# loss = np.linalg.norm(self.weights - np.array([-30.,-30.]))
 		return loss
-
-	# don't eed
-	# def predict(self, images):
-	# 	with torch.no_grad():
-	# 		logits = self.forward(images)
-	# 		_, predicted = torch.max(logits.data, 1)
-
-	# 	return predicted
-	
-	#d dot eed
-	# def test_loss(self):
-	# 	with torch.no_grad():
-	# 		loss = []
-	# 		for data in self.testloader:
-	# 			images, labels = data
-	# 			logits = self.forward(images)
-	# 			loss.append(self.criterion(logits, labels))
-	# 		mean_loss = np.mean(loss)
-
-	# 	return mean_loss
-
-	# def train_loss(self):
-	# 	with torch.no_grad():
-	# 		loss = []
-	# 		for data in self.trainloader:
-	# 			images, labels = data
-	# 			logits = self.forward(images)
-	# 			loss.append(self.criterion(logits, labels))
-	# 		mean_loss = np.mean(loss)
-
-	# 	return mean_loss
 	
 	def test_accuracy(self):
 		return "no accuracies with ellipses"
-		# correct = 0
-		# total = 0
-		# for data in self.testloader:
-		# 	images, labels = data
-		# 	predicted = self.predict(images)
-		# 	total += labels.size(0)
-		# 	correct += (predicted == labels).sum().item()
-		# return correct / total
 
 	def train_accuracy(self):
 		return "no accuracies with ellipses"
-	# 	correct = 0
-	# 	total = 0
-	# 	for data in self.trainloader:
-	# 		images, labels = data
-	# 		predicted = self.predict(images)
-	# 		total += labels.size(0)
-	# 		correct += (predicted == labels).sum().item()
-	# 	return correct / total
 
-	def unlearn(self):
+	def unlearn(self, color_iter):
 		# self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
 		# self.descent_paths.append(self.current_descent)
-		if self.resets % 100 == 1:
-			self.plot_descent_paths()
-		# self.current_descent = [[-15], [-15]]
-		# self.weights = np.array([-15., -15.],)
+		if self.resets % self.plot_freq == 1:
+			self.plot_descent_paths(next(color_iter), True)
+			
 
-		self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
-		self.current_descent = [[self.weights[0]], [self.weights[1]]]
+		self.current_descent = [[-15], [-15]]
+		self.weights = np.array([-15., -15.],)
+		#self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
+		#self.current_descent = [[self.weights[0]], [self.weights[1]]]
 		self.resets += 1
 
 
-
 	def forward(self, x):
-		# # print(x.shape)
-		# x = x.view(-1, 784)
-		# # print( "again!",x.shape)
-		# # print('here')
-		# x = F.relu(self.fc1(x))
-		# # print('here2')
-		# x = F.relu(self.fc2(x))
-		# x = self.fc3(x)
 		return None
 
-	def plot_descent_paths(self):
-		print("current descent", self.current_descent[0])
-		c=next(color)
+	def plot_descent_paths(self, color, separate_graphs = True):
+		# print("current descent", self.current_descent[0])
+		
+		c = color
 
-		# plt.scatter(-15, -15, s= 200, c = "black")
 		plt.scatter(self.current_descent[0][0], self.current_descent[1][0], s=100, c='black')
-		plt.text(self.current_descent[0][0]+0.1, self.current_descent[1][0]+0.1, 'start', fontsize=9)
+		# plt.text(self.current_descent[0][0]+0.1, self.current_descent[1][0]+0.1, 'start', fontsize=9)
 
 		plt.scatter(self.ell.m[0], self.ell.m[1], s= 100, c = "black")
-		plt.text(self.ell.m[0]+0.1, self.ell.m[1]+0.1, 'min', fontsize=9)
+		# plt.text(self.ell.m[0]+0.1, self.ell.m[1]+0.1, 'min', fontsize=9)
 
-		plt.scatter(self.current_descent[0], self.current_descent[1], c=c)
+		if separate_graphs == True:
+			plt.scatter(self.current_descent[0], self.current_descent[1], c=c)
+			plt.savefig('plots/descent' + str(self.resets) + '.png')
+			plt.close()
+		else:
+			plt.scatter(self.current_descent[0], self.current_descent[1], c=c)	
 
-		plt.savefig('plots/descent' + str(self.resets) + '.png')
-		plt.close()
 
+mpl_logger = logging.getLogger('matplotlib')
+mpl_logger.setLevel(logging.ERROR)
 
-# landscape.ellipse_list[0].m = np.array([-10., -10])
-# landscape.ellipse_list[1].m = np.array([-10., 10])
 torch.manual_seed(0)
 np.random.seed(0)
+
 landscape = Ellipse_Net()
-landscape.plot(save=True)
+landscape.plot(save = True)
 plt.close()
-color=iter(cm.cool(np.linspace(0,1,12)))
+
 model = pol_net(landscape, logger=None)
 print(model.net.ell.height)
 print("Let's train that model!!!!")
 model.train()
 
-# print(model.avg_rewards)
-# print(model.sigma_rewards)
-# landscape.plot_descent_paths()
 plt.savefig('plots/descent_paths')
 
 plt.close()
