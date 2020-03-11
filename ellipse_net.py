@@ -65,14 +65,14 @@ class Ellipse_Net(nn.Module):
 		self.eigen_std = 0.2
 		self.height_boundary = 5 
 
-		self.descent_paths = []
+		# self.descent_paths = []
 		self.resets = 0
 		self.plot_freq = 1000
 
 		# maybe modify this init later
-		#self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
+		self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
 
-		self.weights = np.array([-15., -15.],)
+		# self.weights = np.array([-15., -15.],)
 		self.current_descent = [[self.weights[0]], [self.weights[1]]]
 
 		if self.num_means == 1:
@@ -160,13 +160,14 @@ class Ellipse_Net(nn.Module):
 		if self.resets % self.plot_freq == 1:
 			self.plot_descent_paths(next(color_iter), True)
 			
+		# self.current_descent = [[-15], [-15]]
+		# self.weights = np.array([-15., -15.],)
+		self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
+		self.current_descent = [[self.weights[0]], [self.weights[1]]]
 
-		self.current_descent = [[-15], [-15]]
-		self.weights = np.array([-15., -15.],)
-		#self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
-		#self.current_descent = [[self.weights[0]], [self.weights[1]]]
+		self.ell.sample_ellipse(self.mean_boundary, self.eigen_mean, self.eigen_std, self.height_boundary)
+
 		self.resets += 1
-
 
 	def forward(self, x):
 		return None
