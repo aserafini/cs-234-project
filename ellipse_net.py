@@ -231,7 +231,9 @@ class Ellipse_Net(nn.Module):
 		plt.scatter([end_dot_x], [end_dot_y], s= 100, c = "black")
 
 		if separate_graphs == True:
-			plt.scatter(x_descent, y_descent, c=c, marker='x')
+			color_list = cm.summer(np.linspace(0,1, len(x_descent)))
+
+			plt.scatter(x_descent, y_descent, c=color_list, marker='x')
 			plt.savefig('plots/descent_landscape' + str(self.resets) + '.png')
 			plt.close()
 		else:

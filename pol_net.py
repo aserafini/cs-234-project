@@ -33,13 +33,13 @@ class pol_net(nn.Module):
       self.logger = logger
 
     self.net = net
-    self.gamma = 0.9
+    self.gamma = 1.0
     self.lr = 0.001
 
     ### HOW LONG ARE WE TRAINING FOR !!!!! CHANGE HERE DON'T HARDCODE ###
-    self.num_trainings = 10
-    self.num_epochs = 15
-    self.num_batches = 10000
+    self.num_trainings = 5
+    self.num_epochs = 10
+    self.num_batches = 20000
 
     self.initialize_lstm()
     self.linear = nn.Linear(self.lstm_hidden_size, 1, bias = False)
@@ -75,7 +75,7 @@ class pol_net(nn.Module):
       #   I think, maybe equivalently, have a stacked LSTM
 
       self.lstm_input_size = 1  # [g] or [g, g^2]??
-      self.lstm_hidden_size = 32
+      self.lstm_hidden_size = 1
 
       # note: "batch" is all the parameters since this is elementwise for each param
       # Input and output thus (batch, seq, feature), but sequence length is 1 for each
@@ -99,10 +99,10 @@ class pol_net(nn.Module):
 
       ####### HERE IS WHERE TO TOGGLE FOR LSTM ON/OFF #######
   def forward(self, vanilla_grad, hidden):
-      x, hidden = self.lstm(vanilla_grad, hidden)
-      chocolate_grad = self.linear(x)
+      # x, hidden = self.lstm(vanilla_grad, hidden)
+      # chocolate_grad = self.linear(x)
 
-      # chocolate_grad = self.linear(vanilla_grad)
+      chocolate_grad = self.linear(vanilla_grad)
 
       return chocolate_grad, hidden
 
