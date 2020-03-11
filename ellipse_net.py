@@ -204,7 +204,6 @@ class Ellipse_Net(nn.Module):
 		max_y += y_buff
 		min_y -= y_buff
 
-
 		x = np.linspace(min_x, max_x, 100)
 		y = np.linspace(min_y, max_y, 100)
 
@@ -212,20 +211,20 @@ class Ellipse_Net(nn.Module):
 		fun_map = np.empty((x.size, y.size))
 		for i in range(x.size):
 			for j in range(y.size):
-				fun_map[i,j] = self.evaluate(np.array([x[i], y[j]]))
+				fun_map[99 - j, i] = self.evaluate(np.array([x[i], y[j]]))
 
 		plt.imshow(fun_map, cmap = 'BuPu_r')
 		plt.colorbar()
 
 		x_descent = 100 * (self.current_descent[0] - min_x) / (max_x - min_x)
-		y_descent = 100 * (self.current_descent[1] - min_y) / (max_y - min_y)
+		y_descent = 100 - 100 * (self.current_descent[1] - min_y) / (max_y - min_y)
 
 		c = color
 		start_dot_x = 100 * (self.current_descent[0][0] - min_x) / (max_x - min_x)
-		start_dot_y = 100 * (self.current_descent[1][0] - min_y) / (max_y - min_y)
+		start_dot_y = 100 - 100 * (self.current_descent[1][0] - min_y) / (max_y - min_y)
 
 		end_dot_x = 100 * (self.ell.m[0] - min_x) / (max_x - min_x)
-		end_dot_y = 100 * (self.ell.m[1] - min_y) / (max_y - min_y)
+		end_dot_y = 100 - 100 * (self.ell.m[1] - min_y) / (max_y - min_y)
 
 		plt.scatter([start_dot_x], [start_dot_y], s=100, c='black')
 		plt.scatter([end_dot_x], [end_dot_y], s= 100, c = "black")
