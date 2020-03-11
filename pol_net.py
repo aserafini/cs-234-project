@@ -51,7 +51,7 @@ class pol_net(nn.Module):
 
     self.optimizer = torch.optim.Adam(self.parameters(), lr = self.lr)
 
-    self.color = iter(cm.cool(np.linspace(0,1, self.num_batches * self.num_trainings // self.net.plot_freq + 2 )))
+    self.color = cm.cool(np.linspace(0,1, self.num_batches * self.num_trainings // self.net.plot_freq + 2 ))
 
   def initialize_hidden(self):
     self.hiddens_list = []

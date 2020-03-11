@@ -116,6 +116,7 @@ class Ellipse_Net(nn.Module):
 			# im = ax.imshow(fun_map)
 			plt.imshow(fun_map)
 			plt.colorbar()
+			plt.scatter([40], [40])
 			# plt.scatter(-15, -15)
 			# ax.set_xticks(range(40))
 			# ax.set_xticklabels(np.arange(-2 * self.mean_boundary, 2 * self.mean_boundary, 5))
@@ -158,7 +159,7 @@ class Ellipse_Net(nn.Module):
 		# self.weights = np.random.uniform(low = -self.mean_boundary, high = self.mean_boundary, size = (self.landscape_dim,))
 		# self.descent_paths.append(self.current_descent)
 		if self.resets % self.plot_freq == 1:
-			self.plot_descent_paths(next(color_iter), True)
+			self.plot_descent_landscape(color_iter[0], True)
 			
 
 		self.current_descent = [[-15], [-15]]
@@ -185,6 +186,52 @@ class Ellipse_Net(nn.Module):
 		if separate_graphs == True:
 			plt.scatter(self.current_descent[0], self.current_descent[1], c=c)
 			plt.savefig('plots/descent' + str(self.resets) + '.png')
+			plt.close()
+		else:
+			plt.scatter(self.current_descent[0], self.current_descent[1], c=c)
+
+	def plot_descent_landscape(self, color, separate_graphs = True):
+		# print("current descent", self.current_descent[0])
+		max_x = np.max([np.max(self.current_descent[0]), self.ell.m[0]])
+		min_x = np.min([np.min(self.current_descent[0]), self.ell.m[0]])
+		max_y = np.max([np.max(self.current_descent[1]), self.ell.m[1]])
+		min_y = np.min([np.min(self.current_descent[1]), self.ell.m[1]])
+		x_buff = (max_x - min_x)*.3
+		y_buff = (max_x - min_x)*.3
+		max_x += x_buff
+		min_x -= x_buff
+		max_y += y_buff
+		min_y -= y_buff
+
+
+		x = np.linspace(min_x, max_x, 100)
+		y = np.linspace(min_y, max_y, 100)
+
+		# filling the heatmap, value by value
+		fun_map = np.empty((x.size, y.size))
+		for i in range(x.size):
+			for j in range(y.size):
+				fun_map[i,j] = self.evaluate(np.array([x[i], y[j]]))
+
+		plt.imshow(fun_map, cmap = 'BuPu_r')
+		plt.colorbar()
+
+		x_descent = 100 * (self.current_descent[0] - min_x) / (max_x - min_x)
+		y_descent = 100 * (self.current_descent[1] - min_y) / (max_y - min_y)
+
+		c = color
+		start_dot_x = 100 * (self.current_descent[0][0] - min_x) / (max_x - min_x)
+		start_dot_y = 100 * (self.current_descent[1][0] - min_y) / (max_y - min_y)
+
+		end_dot_x = 100 * (self.ell.m[0] - min_x) / (max_x - min_x)
+		end_dot_y = 100 * (self.ell.m[1] - min_y) / (max_y - min_y)
+
+		plt.scatter([start_dot_x], [start_dot_y], s=100, c='black')
+		plt.scatter([end_dot_x], [end_dot_y], s= 100, c = "black")
+
+		if separate_graphs == True:
+			plt.scatter(x_descent, y_descent, c=c, marker='x')
+			plt.savefig('plots/descent_landscape' + str(self.resets) + '.png')
 			plt.close()
 		else:
 			plt.scatter(self.current_descent[0], self.current_descent[1], c=c)	
